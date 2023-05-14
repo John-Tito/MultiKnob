@@ -57,6 +57,8 @@ knob_ticks().
 ## API Reference
 
 ***knob_init()***
+
+
 Initialize the knob object and its associated pins.
 
 Parameters.
@@ -69,6 +71,8 @@ Parameters.
 - knob_id: Integer indicating the knob ID of the user application.
 
 ***knob_evennt_attach()***
+
+
 Attaches a callback function to a knob event.
 
 Arguments.
@@ -78,6 +82,8 @@ Arguments.
 - cb: the callback function to be executed when the event is triggered.
 
 ***knob_evennt_detach()***
+
+
 Detach the callback function from the knob event.
 
 Arguments.
@@ -86,6 +92,8 @@ Arguments.
 - event: The event of the knob from which to detach the callback function.
 
 ***knob_start()***
+
+
 Add the knob object to the watch list and start monitoring.
 
 Parameters.
@@ -97,6 +105,8 @@ Return value.
 - If the object is being monitored, -1 is returned.
 
 ***knob_stop()***
+
+
 Delete the knob from the watch list.
 
 Arguments.
@@ -104,6 +114,8 @@ Arguments.
 - handle: Pointer to the knob to be deleted.
 
 ***get_knob_event()***
+
+
 Return the current knob event.
 
 Arguments.
@@ -112,7 +124,12 @@ Arguments.
 
 Return value.
 
-- The current knob event. knob_ticks() checks the events of all monitored knobs and executes the callback function accordingly. Should be called repeatedly in the main loop.
+- The current knob event.
+
+***knob_ticks()***
+
+
+checks the events of all monitored knobs and executes the callback function accordingly. Should be called repeatedly in the main loop.
 
 ## Copyright
 
