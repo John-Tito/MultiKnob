@@ -1,133 +1,148 @@
-# MultiButton
+# MultiKnob Library
 
-## 简介
-MultiButton 是一个小巧简单易用的事件驱动型按键驱动模块，可无限量扩展按键，按键事件的回调异步处理方式可以简化你的程序结构，去除冗余的按键处理硬编码，让你的按键业务逻辑更清晰。
+This library provides a multi-knob input solution for microcontroller projects.
 
-## 使用方法
-1.先申请一个按键结构
+---
 
-```c
-struct Button button1;
-```
-2.初始化按键对象，绑定按键的GPIO电平读取接口**read_button_pin()** ，后一个参数设置有效触发电平
+## Compatibility
 
-```c
-button_init(&button1, read_button_pin, 0, 0);
-```
-3.注册按键事件
+This library has not been tested.
 
-```c
-button_attach(&button1, SINGLE_CLICK, Callback_SINGLE_CLICK_Handler);
-button_attach(&button1, DOUBLE_CLICK, Callback_DOUBLE_Click_Handler);
-...
-```
-4.启动按键
+---
 
-```c
-button_start(&button1);
-```
-5.设置一个5ms间隔的定时器循环调用后台处理函数
+## Installation
 
-```c
-while(1) {
-    ...
-    if(timer_ticks == 5) {
-        timer_ticks = 0;
+1. Download the MultiKnob.h and MultiKnob.c files.
+2. Add both files to your project directory.
+3. Include MultiKnob.h in the main application.
 
-        button_ticks();
-    }
-}
-```
+---
 
-## 特性
+## Usage
 
-MultiButton 使用C语言实现，基于面向对象方式设计思路，每个按键对象单独用一份数据结构管理：
+1. Use knob_init() to create the knob object.
+2. Use knob_event_attach() to attach the callback function to the knob event.
+3. Use knob_start() to start monitoring the knob activity.
+4. In the main loop of the program, call knob_ticks() to check the knob event and execute the attached callback function.
+
+---
+
+## Sample Code
 
 ```c
-struct Button {
-	uint16_t ticks;
-	uint8_t  repeat: 4;
-	uint8_t  event : 4;
-	uint8_t  state : 3;
-	uint8_t  debounce_cnt : 3;
-	uint8_t  active_level : 1;
-	uint8_t  button_level : 1;
-	uint8_t  button_id;
-	uint8_t  (*hal_button_Level)(uint8_t  button_id_);
-	BtnCallback  cb[number_of_event];
-	struct Button* next;
-};
-```
-这样每个按键使用单向链表相连，依次进入 button_handler(struct Button* handle) 状态机处理，所以每个按键的状态彼此独立。
 
+#include "MultiKnob.h"
 
-## 按键事件
-
-事件 | 说明
----|---
-PRESS_DOWN | 按键按下，每次按下都触发
-PRESS_UP | 按键弹起，每次松开都触发
-PRESS_REPEAT | 重复按下触发，变量repeat计数连击次数
-SINGLE_CLICK | 单击按键事件
-DOUBLE_CLICK | 双击按键事件
-LONG_PRESS_START | 达到长按时间阈值时触发一次
-LONG_PRESS_HOLD | 长按期间一直触发
-
-
-## Examples
-
-```c
-#include "button.h"
-
-unit8_t btn1_id = 0;
-
-struct Button btn1;
-
-uint8_t read_button_GPIO(uint8_t button_id)
+void knob_turn_clockwise(knob_btn_t *handle)
 {
-	// you can share the GPIO read function with multiple Buttons
-	switch(button_id)
-	{
-		case btn1_id:
-			return HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
-			break;
-
-		default:
-			return 0;
-			break;
-	}
-}
-void BTN1_PRESS_DOWN_Handler(void* btn)
-{
-	//do something...
+// Handle clockwise knob events
 }
 
-void BTN1_PRESS_UP_Handler(void* btn)
+void setup()
 {
-	//do something...
+knob_btn_t knob1.
+knob_init(&knob1, read_pin_level, A0, A1, HIGH, 1); // Change the desired function and pin value.
+knob_evennt_attach(&knob1, TURN_CLOCKWISE, knob_turn_clockwise).
+knob_start(&knob1).
 }
 
-...
-
-int main()
+void loop()
 {
-	button_init(&btn1, read_button_GPIO, 0, btn1_id);
-	button_attach(&btn1, PRESS_DOWN,       BTN1_PRESS_DOWN_Handler);
-	button_attach(&btn1, PRESS_UP,         BTN1_PRESS_UP_Handler);
-	button_attach(&btn1, PRESS_REPEAT,     BTN1_PRESS_REPEAT_Handler);
-	button_attach(&btn1, SINGLE_CLICK,     BTN1_SINGLE_Click_Handler);
-	button_attach(&btn1, DOUBLE_CLICK,     BTN1_DOUBLE_Click_Handler);
-	button_attach(&btn1, LONG_PRESS_START, BTN1_LONG_PRESS_START_Handler);
-	button_attach(&btn2, LONG_PRESS_HOLD,  BTN1_LONG_PRESS_HOLD_Handler);
-	button_start(&btn1);
-
-	//make the timer invoking the button_ticks() interval 5ms.
-	//This function is implemented by yourself.
-	__timer_start(button_ticks, 0, 5);
-
-	while(1)
-	{}
+knob_ticks().
 }
 ```
 
+---
 
+## API Reference
+
+***knob_init()***
+Initialize the knob object and its associated pins.
+
+Parameters.
+
+- handle: Pointer to the knob object to be initialized.
+- get_pin_level: Pointer to a function that returns the current state of the given pin.
+- aio_pin: The analog input pin corresponding to the AIO pin of the knob.
+- bio_pin: Binary input and output pin corresponding to the BIO pin of the knob.
+- active_level: integer indicating the active logic state level. High level is 1, low level is 0.
+- knob_id: Integer indicating the knob ID of the user application.
+
+***knob_evennt_attach()***
+Attaches a callback function to a knob event.
+
+Arguments.
+
+- handle: A pointer to the knob object.
+- event: The event of the knob to attach the callback function to.
+- cb: the callback function to be executed when the event is triggered.
+
+***knob_evennt_detach()***
+Detach the callback function from the knob event.
+
+Arguments.
+
+- handle: Pointer to the knob object.
+- event: The event of the knob from which to detach the callback function.
+
+***knob_start()***
+Add the knob object to the watch list and start monitoring.
+
+Parameters.
+
+- handle: A pointer to the knob to start monitoring.
+
+Return value.
+
+- If the object is being monitored, -1 is returned.
+
+***knob_stop()***
+Delete the knob from the watch list.
+
+Arguments.
+
+- handle: Pointer to the knob to be deleted.
+
+***get_knob_event()***
+Return the current knob event.
+
+Arguments.
+
+- handle: Pointer to the knob to check its event.
+
+Return value.
+
+- The current knob event. knob_ticks() checks the events of all monitored knobs and executes the callback function accordingly. Should be called repeatedly in the main loop.
+
+## Copyright
+
+``` txt
+MIT License
+
+Copyright (c) 2018 Zibin Zheng
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+## Reference/Quote
+
+1. [Elegant de-jittering of rotary encoders (EC11,quadrature)](https://zhuanlan.zhihu.com/p/453130384). [liu-zi-gui](https://www.zhihu.com/people/liu-zi-gui)
+
+2. [MultiButton)](https://github.com/0x1abin/MultiButton.git). [0x1abin](https://github.com/0x1abin)
